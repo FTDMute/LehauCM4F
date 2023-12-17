@@ -197,22 +197,26 @@ void SecCalculate(double start, double end) {
 	}
 }
 
-vector<double> sim_sne(double eps, double x_0, double y_0, function<double(double, double)> f_1, function<double(double, double)> f_2)
+vector<double> MpiSys(double eps, double x_0, double y_0, function<double(double, double)> f_1, function<double(double, double)> f_2)
 
 {
 	double x_k = x_0;
+	double x_kk;
 	double y_k = y_0;
-	double ro = 0.;
+	double ro=0.;
 	int it = 0;
 	do
 	{
-		if (fabs(f_1(x_k, y_k) - x_k) <= fabs(f_2(x_k, y_k) - y_k))
-			ro = fabs(f_2(x_k, y_k) - y_k);
-		else
-			ro = fabs(f_1(x_k, y_k) - x_k);
+		x_kk = x_k;
 		x_k = f_1(x_k, y_k);
 		y_k = f_2(x_k, y_k);
 		it++;
+		if (fabs(f_1(x_k, y_k) - x_k) <= fabs(f_2(x_k, y_k) - y_k)) {
+			ro = fabs(f_2(x_k, y_k) - y_k);
+		}
+		else {
+			ro = fabs(f_1(x_k, y_k) - x_k);
+		}
 	} while (ro > eps);
 	std::vector<double> roots;
 	roots.push_back(x_k);
@@ -221,7 +225,7 @@ vector<double> sim_sne(double eps, double x_0, double y_0, function<double(doubl
 	return roots;
 }
 
-vector<double> nm_sne_exact(double eps, double x_0, double y_0,function<double(double, double)> f_1, function<double(double, double)> df_1_x, function<double(double, double)> df_1_y, function<double(double, double)> f_2, function<double(double, double)> df_2_x, function<double(double, double)> df_2_y)
+vector<double> NewtonExactSys(double eps, double x_0, double y_0,function<double(double, double)> f_1, function<double(double, double)> df_1_x, function<double(double, double)> df_1_y, function<double(double, double)> f_2, function<double(double, double)> df_2_x, function<double(double, double)> df_2_y)
 {
 	double x_k = x_0;
 	double y_k = y_0;
@@ -247,7 +251,7 @@ vector<double> nm_sne_exact(double eps, double x_0, double y_0,function<double(d
 	return roots;
 }
 
-vector<double> nm_sne_approx(double eps, double x_0, double y_0, function<double(double, double)> f_1, function<double(double, double)> f_2)
+vector<double> NewtonApproxSys(double eps, double x_0, double y_0, function<double(double, double)> f_1, function<double(double, double)> f_2)
 {
 	double x_k = x_0;
 	double y_k = y_0;
@@ -282,32 +286,45 @@ int main() {
 	setlocale(LC_ALL, "Russian");
 
 	double start, end, startt, endd;
-	cout << "Введите начало и конец для (1)" << endl;
+	/*cout << "Введите начало и конец для (1)" << endl;
 	cin >> startt;
-	cin >> endd;
+	cin >> endd;*/
 
 	//1
 
-	BisectionCalculate(startt, endd);
-	ChordCalculate(startt, endd);
-	IterationCalculate(startt, endd);
-	CasCalculate(startt, endd);
-	SecCalculate(startt, endd);
+	//BisectionCalculate(startt, endd);
+	//ChordCalculate(startt, endd);
+	//IterationCalculate(startt, endd);
+	//CasCalculate(startt, endd);
+	//SecCalculate(startt, endd);
 
 	cout << "Введите начало и конец для (2) и (3)" << endl;
 	cin >> start;
 	cin >> end;
 
 	//2
-
+	vector<double> roots;
 	cout << "Задача 2" << endl;
-	vector<double> roots = sim_sne(1e-5, 0, 0, f_1, f_2);
+	for (double i = start; i <= end; i += 0.01) {
+		
+		if (abs(f_1(i, i) + f_1(i, i)) < 1){
+			cout << i << endl;
+			roots = MpiSys(1e-5, i, i, f_1, f_2);
+			break;
+		}
+	}
 	double x_0 = roots[0];
 	double y_0 = roots[1];
 	int it = (int)roots[2];
+	//double F_xx = -2. * (y_0 * y_0 - 1.) * (x_0 * exp(y_0) + y_0 * exp(x_0)) - 4. *x_0* (y_0 * y_0 - 1.) * (exp(y_0) + y_0 * exp(x_0)) - (x_0 * x_0 - 1.) * (y_0 * y_0 - 1.) * y_0 * exp(x_0);
+	//double F_xy = -4. * x_0 * y_0 * (x_0 * exp(y_0) + y_0 * exp(x_0)) - 2. * x_0 * (y_0 * y_0 - 1.) * (x_0 * exp(y_0) + exp(x_0)) - 2. * y_0 * (exp(y_0) + y_0 * exp(x_0)) - (x_0 * x_0 - 1.) * (y_0 * y_0 - 1.)*(exp(y_0) + exp(x_0));
+	//double F_yy = -2. * (x_0 * x_0 - 1.) * (x_0 * exp(y_0) + y_0 * exp(x_0)) - 4. *y_0* (x_0 * x_0 - 1.) * (x_0*exp(y_0) + exp(x_0)) - (x_0 * x_0 - 1.) * (y_0 * y_0 - 1.) * x_0 * exp(y_0);
+	
+	//для 11 варианта
 	double F_xx = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * x_0 * x_0) - sin(x_0 + y_0);
 	double F_xy = exp(x_0 * x_0 + y_0 * y_0) * 4. * x_0 * y_0 - sin(x_0 + y_0);
 	double F_yy = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * y_0 * y_0) - sin(x_0 + y_0);
+
 	cout << "Решение системы двух нелинейных уравнений: x = " << x_0 << " , y = " << y_0 << endl;
 	if (F_xx * F_yy - F_xy * F_xy > 0)
 	{
@@ -315,22 +332,27 @@ int main() {
 		if (F_xx > 0)
 		{
 			cout << "точка (" << x_0 << "," << y_0 << ") является точкой минимума" << endl;
-			cout << "значение функции z в этой точке: " << exp(x_0 * x_0 + y_0 * y_0) + sin(x_0 + y_0) << endl;
+			//cout << "значение функции z в этой точке: " << 1 - (x_0 * x_0 - 1) * (y_0 * y_0 - 1) * (y_0 * exp(x_0) + x_0 * exp(y_0)) << endl << endl;
+			cout << "значение функции z в этой точке: " << exp(x_0 * x_0 + y_0 * y_0) + sin(x_0 + y_0) << endl << endl;
 		}
 	}
-	cout << "------------------------------------------------------" << endl;
+	cout << "------------------------------------------------------" << endl<<endl;
 
 	// 3 
 
 	cout << "Задача 3" << endl;
-	cout << "Решение уравнения Ньютона с точными производными" << endl << endl;
-	roots = nm_sne_exact(1e-5, 0.5, 0.5, F_1, dF_1_x, dF_1_y, F_2, dF_2_x, dF_2_y);
+	cout << "Решение уравнения Ньютона с точными производными" << endl;
+	for (double i = start; i <= end; i += 0.01) {
+
+		if (abs(f_1(i, i) + f_1(i, i)) < 1) {
+			cout << i << endl;
+			roots = NewtonExactSys(1e-5, i, i, F_1, dF_1_x, dF_1_y, F_2, dF_2_x, dF_2_y);
+			break;
+		}
+	}
 	x_0 = roots[0];
 	y_0 = roots[1];
 	it = (int)roots[2];
-	F_xx = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * x_0 * x_0) - sin(x_0 + y_0);
-	F_xy = exp(x_0 * x_0 + y_0 * y_0) * 4. * x_0 * y_0 - sin(x_0 + y_0);
-	F_yy = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * y_0 * y_0) - sin(x_0 + y_0);
 	cout << "Решение системы двух нелинейных уравнений: x = " << x_0 << " , y = " << y_0 << ". количество итераций: " << it << endl;
 	if (F_xx * F_yy - F_xy * F_xy > 0)
 	{
@@ -338,17 +360,22 @@ int main() {
 		if (F_xx > 0)
 		{
 			cout << "точка (" << x_0 << "," << y_0 << ") является точкой минимума" << endl;
+			//cout << "значение функции z в этой точке: " << 1 - (x_0 * x_0 - 1) * (y_0 * y_0 - 1) * (y_0 * exp(x_0) + x_0 * exp(y_0)) << endl << endl;
 			cout << "значение функции z в этой точке: " << exp(x_0 * x_0 + y_0 * y_0) + sin(x_0 + y_0) << endl << endl;
 		}
 	}
-	cout << "Решение уравнения Ньютона с приближенным вычислением производных" << endl << endl;
-	roots = nm_sne_approx(1e-5, 0.5, 0.5, F_1, F_2);
+	cout << "Решение уравнения Ньютона с приближенным вычислением производных" << endl;
+	for (double i = start; i <= end; i += 0.01) {
+
+		if (abs(f_1(i, i) + f_1(i, i)) < 1) {
+			cout << i << endl;
+			roots = NewtonApproxSys(1e-6, i, i, F_1, F_2);
+			break;
+		}
+	}
 	x_0 = roots[0];
 	y_0 = roots[1];
 	it = (int)roots[2];
-	F_xx = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * x_0 * x_0) - sin(x_0 + y_0);
-	F_xy = exp(x_0 * x_0 + y_0 * y_0) * 4. * x_0 * y_0 - sin(x_0 + y_0);
-	F_yy = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * y_0 * y_0) - sin(x_0 + y_0);
 	cout << "Решение системы двух нелинейных уравнений: x = " << x_0 << " , y = " << y_0 << ". количество итераций: " << it << endl;
 	if (F_xx * F_yy - F_xy * F_xy > 0)
 	{
@@ -356,8 +383,13 @@ int main() {
 		if (F_xx > 0)
 		{
 			cout << "точка (" << x_0 << "," << y_0 << ") является точкой минимума" << endl;
+			//cout << "значение функции z в этой точке: " << 1 - (x_0 * x_0 - 1) * (y_0 * y_0 - 1) * (y_0 * exp(x_0) + x_0 * exp(y_0)) << endl << endl;
 			cout << "значение функции z в этой точке: " << exp(x_0 * x_0 + y_0 * y_0) + sin(x_0 + y_0) << endl << endl;
 		}
 	}
 	return 0;
 }
+
+//F_xx = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * x_0 * x_0) - sin(x_0 + y_0);
+//F_xy = exp(x_0 * x_0 + y_0 * y_0) * 4. * x_0 * y_0 - sin(x_0 + y_0);
+//F_yy = exp(x_0 * x_0 + y_0 * y_0) * (2 + 4. * y_0 * y_0) - sin(x_0 + y_0);

@@ -8,14 +8,58 @@ double DiffFunction(double x) {
 	return -2 * (cos(x) - x * sin(x));
 }
 
-double f_1(double x, double y)
+/*double f_1(double x, double y)
 {
-	return -cos(x + y) / (2. * exp(x * x + y * y));
+    return sqrt(( - (2. * x * (x * exp(y) + y * exp(x))) / (exp(y) + y * exp(x))) + 1);
 }
 
 double f_2(double x, double y)
 {
-	return -cos(x + y) / (2. * exp(x * x + y * y));
+	return sqrt(( - (2. * y * (x * exp(y) + y * exp(x))) / (x * exp(y) + exp(x))) + 1);
+}
+
+double F_1(double x, double y)
+
+{
+    return ((x * x - 1.) * (exp(y) + y * exp(x))) + x * (2. * (x * exp(y) + y * exp(x)));
+}
+
+double F_2(double x, double y)
+{
+    return ((y * y - 1.) * (x * exp(y) + exp(x))) + y * (2. * (x * exp(y) + y * exp(x)));
+}
+
+double dF_1_x(double x, double y)
+{
+    return -2. * (y * y - 1.) * (x * exp(y) + y * exp(x)) - 4. * x * (y * y - 1.) * (exp(y) + y * exp(x)) - (x * x - 1.) * (y * y - 1.) * y * exp(x);
+}
+
+double dF_1_y(double x, double y)
+{
+    return -4. * x * y * (x * exp(y) + y * exp(x)) - 2. * x * (y * y - 1.) * (x * exp(y) + exp(x)) - 2. * y * (exp(y) + y * exp(x)) - (x * x - 1.) * (y * y - 1.) * (exp(y) + exp(x));
+}
+
+double dF_2_x(double x, double y)
+{
+    return -4. * x * y * (x * exp(y) + y * exp(x)) - 2. * x * (y * y - 1.) * (x * exp(y) + exp(x)) - 2. * y * (exp(y) + y * exp(x)) - (x * x - 1.) * (y * y - 1.) * (exp(y) + exp(x));
+}
+
+double dF_2_y(double x, double y)
+{
+    return -2. * (x * x - 1.) * (x * exp(y) + y * exp(x)) - 4. * y * (x * x - 1.) * (x * exp(y) + exp(x)) - (x * x - 1.) * (y * y - 1.) * x * exp(y);
+}*/
+
+
+//функция 11 варианта
+double f_1(double x, double y)
+{
+    return -cos(x + y) / (2. * exp(x * x + y * y));
+}
+
+double f_2(double x, double y)
+{
+    return -cos(x + y) / (2. * exp(x * x + y * y));
+
 }
 
 double F_1(double x, double y)
@@ -25,6 +69,7 @@ double F_1(double x, double y)
 }
 
 double F_2(double x, double y)
+
 {
     return 2. * y * exp(x * x + y * y) + cos(x + y);
 }
